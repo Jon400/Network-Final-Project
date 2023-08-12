@@ -1,15 +1,17 @@
 import matplotlib.pyplot as plt
 from datetime import datetime
+import seaborn as sns
+import numpy
 import pandas as pd
 
 
 def main():
+    plot_using_csv("data/spotify.csv")
     plot_using_csv("data/test1.csv")
     plot_using_csv("data/test2.csv")
     plot_using_csv("data/test3.csv")
-    # plot_using_csv("data/test4.csv")
-
-    # plot_using_txt("data/channel-10-1.txt")
+    plot_using_csv("data/correlated.csv")
+    plot_using_csv("data/uncorrelated.csv")
 
 
 def plot_using_csv(filename):
@@ -17,7 +19,7 @@ def plot_using_csv(filename):
     df = pd.read_csv(filename)
 
     # filter only incoming packets
-    df = df.loc[df['Destination'] == '10.0.2.15']
+    df = df.loc[(df['Destination'] == '10.0.2.15') | (df['Destination'] == '2001:67c:4e8:f004::9')]
     print(df.shape)
 
     # filter only relevant columns
@@ -27,11 +29,21 @@ def plot_using_csv(filename):
     df_sorted = df.sort_values("Length", ascending=False)
     print(df_sorted.head())
 
+    print(numpy.unique(df["Time"]).size)
+    bin_range = (df['Length'].min(), df['Length'].max()) 
+    time_interval = 0.01
+
     # each bin is 5 packets
+
     plt.hist(df.Time, weights=df.Length, bins=df.shape[0])
     plt.xlabel("Time(Seconds)")
     plt.ylabel("Packet Length")
-    plt.show()
+    plt.title("Traffic for " + filename.split("/")[-1].split(".")[0])
+    #plt.show()
+
+    # Save plot to res folder
+    plt.savefig("../../res/traffic/" + filename.split("/")[-1].split(".")[0] + ".png")
+    plt.close()
 
 
 

@@ -15,10 +15,14 @@ burst_size = 0
 previous_time = 0
 
 def main():
-    plot_inter_message_delay("data/test1.csv")
-    plot_inter_message_delay("data/test2.csv")
-    plot_inter_message_delay("data/test3.csv")
-    plot_inter_message_delay("data/test5.csv")
+    # generate plot graph with 4 subplots in 2 rows and 2 columns
+    fig, axs = plt.subplots(2, 2, figsize=(15, 10))
+    fig.suptitle('PDF of Inter-message Delay for Different Network Traffic')
+    plot_inter_message_delay("data/test1.csv", axs[0, 0])
+    plot_inter_message_delay("data/test2.csv", axs[0, 1])
+    plot_inter_message_delay("data/test3.csv", axs[1, 0])
+    plot_inter_message_delay("data/spotify.csv", axs[1, 1])
+    plt.savefig('../../res/inter-message-delays.png')
     
 
 def if_burst(length, t):
@@ -34,7 +38,8 @@ def if_burst(length, t):
             # time.sleep(delay)
             is_in_burst = True
             previous_time = t
-        elif is_in_burst == False:
+        elif is_in_burst == True:
+            previous_time = t
             return    
 
 def check_time(time):
@@ -44,9 +49,8 @@ def check_time(time):
     THR = 0.5
     if time - previous_time >= THR:
         is_in_burst = False
-        is_burst_detected = True
 
-def plot_inter_message_delay(filename: str):  
+def plot_inter_message_delay(filename: str, ax: plt.Axes = None):  
     # read csv file
     df = pd.read_csv(filename)
 
@@ -60,57 +64,46 @@ def plot_inter_message_delay(filename: str):
 
     burst_data = [] 
 
-    i = 0
-    while i < len(df):
-        if_burst(df.iloc[i]['Length'], df.iloc[i]['Time'])
-        if is_in_burst:
-            while is_in_burst:
-                burst_data.append(df.iloc[i])
-                i += 1
-                if i >= len(df):
-                    break
-                check_time(df.iloc[i]['Time'])
-        i+=1
+    time = sorted(df['Time'].tolist())
+    inter_message_delays = [float(time[i+1] - time[i]) for i in range(len(time)-1)]
+    # i = 0
+    # while i < len(df):
+    #     if_burst(df.iloc[i]['Length'], df.iloc[i]['Time'])
+    #     if is_in_burst:
+    #         while is_in_burst:
+    #             burst_data.append(df.iloc[i])
+    #             i += 1
+    #             if i >= len(df):
+    #                 break
+    #             if_burst(df.iloc[i]['Length'], df.iloc[i]['Time'])
+    #             check_time(df.iloc[i]['Time'])
+    #             if is_in_burst:
+    #                 inter_message_delay.append(df.iloc[i]['Time'] - df.iloc[i-1]['Time'])
+    #     i+=1
 
     # plot probability desnsity function of inter-message delay for this burst, x-axis is time, y-axis is PDF
-    # for example if the busrst is 1, 10, 20, 30, 40, 100, 200, 500, 1000
-    # then the inter-message delay is 9, 10, 10, 10, 60, 100, 300, 500
-    # so the pdf is 1/9, 3/9, 3/9, 3/9, 1/9, 1/9, 1/9, 1/9, 1/9
-    # so the x-axis is 9, 10, 60, 100, 300, 500, 1000
-
-    burst_times = [row['Time'] for row in burst_data]
-    burst_times.sort()
-    inter_message_delay = [(burst_times[j+1] - burst_times[j]) for j in range(len(burst_times) - 1)]
-    inter_message_delay = [delay for delay in inter_message_delay if delay <= 0.5]
     num_bins = 'auto'  # Use 'auto' to calculate the number of bins based on data distribution
-    hist, bin_edges = np.histogram(inter_message_delay, bins=num_bins, density=True)
+    hist, bin_edges = np.histogram(inter_message_delays, bins=num_bins, density=True)
 
     # # Normalize the histogram
     bin_width = bin_edges[1] - bin_edges[0]
     pdf = hist * bin_width
-    #pdf = pdf / pdf.sum()  # Normalize the histogram
 
     # plot the PDF in step function
-    plt.step(bin_edges[:-1], pdf, where='post', label='Histogram of Inter-message Delay')
-    plt.xlabel('Inter-message Delay (Seconds)')
-    plt.ylabel('Probability Density Function (PDF)')
-    plt.title('PDF of Inter-message Delay')
+    ax.step(bin_edges[:-1], pdf, where='mid', label='Histogram of Inter-message Delay')
+    ax.set_xlabel('Inter-message Delay (Seconds)')
+    ax.set_ylabel('Probability Density Function (PDF)')
+    ax.set_title("PDF of Inter-message Delay for " + filename)
     # fit the exponential distribution according to the data pdf and bin
-    
-    fit_params = expon.fit(inter_message_delay)
+    fit_params = expon.fit(inter_message_delays)
     fitted_pdf = expon.pdf(bin_edges[:-1], loc=fit_params[0], scale=fit_params[1])
     fitted_pdf = fitted_pdf * bin_width
-    # Calculate bin widths
-    # bin_widths = np.diff(bin_edges)
-    # # Normalize the fitted PDF to match the area of the histogram (area under the PDF = 1)
-    # area_under_pdf = np.sum(bin_widths * fitted_pdf)
-    # normalized_fitted_pdf = fitted_pdf / area_under_pdf
-    #fitted_pdf = fitted_pdf / fitted_pdf.sum()
     # Plot the fitted exponential distribution as a line
-    plt.plot(bin_edges[:-1], fitted_pdf, label='Fitted Exponential', color='red')
-    plt.grid(True)
-    plt.legend()
-    plt.show()
+    ax.plot(bin_edges[:-1], fitted_pdf, label='Fitted Exponential', color='red')
+    ax.grid(True)
+    ax.legend()
+    # save the plot in res folder
+    #plt.savefig('../../res/inter-message-delays/' + filename.split('/')[-1].split('.')[0] + '.png')
 
 
             
