@@ -12,7 +12,7 @@
 
 ### 2.2. Installation
 1. Clone the project from GitHub by using the following command:
-```https://github.com/Jon400/Network-Final-Project.git```
+```git clone https://github.com/Jon400/Network-Final-Project.git```
 2. Upgrade pip by running the following command:
 ```python -m pip install --upgrade pip```
 3. Navigate to the project folder and run the following command to install all required packages
