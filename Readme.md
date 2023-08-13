@@ -20,7 +20,7 @@
 4. Open jupyter notebook by running the following command:
 ```jupyter notebook```
 5. Open your browser and navigate to your local Jupyter server (usually http://localhost:8888)
-6. Open the file ```Network Final Project.ipynb```
+6. Open the file ```WetPart.ipynb```
 7. Run the notebook by clicking on the ```Run``` button in the toolbar or by pressing ```Shift + Enter```. You can also run the whole notebook by clicking on  ```restart the kernel and run all cells```.
 
 #### Issues during installation
