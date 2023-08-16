@@ -34,7 +34,7 @@ The experiment process is based on the following steps:
 ```git clone https://github.com/Jon400/Network-Final-Project.git```
 2. Upgrade pip by running the following command:
 ```python -m pip install --upgrade pip```
-3. Navigate to the project folder and run the following command to install all required packages:
+3. Navigate to the project folder ```src``` and run the following command to install all required packages:
 ```pip install -r requirements.txt```
 4. Open a Jupyter notebook by running the following command:
 ```jupyter notebook```
